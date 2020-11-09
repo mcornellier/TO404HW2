@@ -1,0 +1,165 @@
+---
+title: "TO404HW2"
+author: "Maxwell Cornellier"
+date: "11/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Library Inputs 
+
+```{r}
+
+library(dplyr)
+library("ggplot2")
+```
+
+# 1. Understand the Data 
+
+
+###Download Data Files & Take 5% Sample of Each 
+
+```{r}
+Jan2019 <- read.csv("201901-citibike-tripdata.csv")
+SampleJan2019 <- sample_frac(Jan2019,0.05)
+SampleFeb2019 <- sample_frac((read.csv("201902-citibike-tripdata.csv")),0.05)
+SampleMar2019 <- sample_frac((read.csv("201903-citibike-tripdata.csv")),0.05)
+SampleApril2019 <- sample_frac((read.csv("201904-citibike-tripdata.csv")),0.05)
+SampleMay2019 <- sample_frac((read.csv("201905-citibike-tripdata.csv")),0.05)
+SampleJune2019 <- sample_frac((read.csv("201906-citibike-tripdata.csv")),0.05)
+SampleJuly2019 <- sample_frac((read.csv("201907-citibike-tripdata.csv")),0.05)
+SampleAugust2019 <- sample_frac((read.csv("201908-citibike-tripdata.csv")),0.05)
+SampleSept2019 <- sample_frac((read.csv("201909-citibike-tripdata.csv")),0.05)
+SampleOct2019 <- sample_frac((read.csv("201910-citibike-tripdata.csv")),0.05)
+SampleNov2019 <- sample_frac((read.csv("201911-citibike-tripdata.csv")),0.05) 
+SampleDec2019 <- sample_frac((read.csv("201912-citibike-tripdata.csv")),0.05)
+```
+
+### Combine Data Files into one Table 
+
+```{r}
+
+CitiBike2019 <- rbind(SampleJan2019,SampleFeb2019,SampleMar2019, SampleApril2019, SampleMay2019, SampleJune2019, SampleJuly2019, SampleAugust2019, SampleSept2019, SampleOct2019, SampleNov2019, SampleDec2019)
+
+# Clean Data 
+
+## Change Variables to Factors as necessary 
+
+CitiBike2019$start.station.id <- as.factor(CitiBike2019$start.station.id)
+CitiBike2019$end.station.id <- as.factor(CitiBike2019$end.station.id)
+CitiBike2019$end.station.name <- as.factor(CitiBike2019$end.station.name)
+CitiBike2019$start.station.name <- as.factor(CitiBike2019$start.station.name)
+CitiBike2019$usertype <- as.factor(CitiBike2019$usertype)
+CitiBike2019$gender <- as.factor(CitiBike2019$gender)
+CitiBike2019$bikeid <- as.factor(CitiBike2019$bikeid)
+CitiBike2019$starttime <- as.POSIXct(CitiBike2019$starttime)
+CitiBike2019$stoptime <- as.POSIXct(CitiBike2019$stoptime)
+```
+
+
+## Descriptive Stats and Visualizations 
+
+
+```{r}
+# Average Trip Duration 
+
+arr_tripduration <- mean(CitiBike2019$tripduration, na.rm = T)
+
+# Longest trip duration 
+
+longest_trip<- max(CitiBike2019$tripduration, na.rm = T)
+
+
+# Shortest trip duration 
+
+shortest_trip <- min(CitiBike2019$tripduration, na.rm = T)
+```
+The average trip duration for a Citi Bike ride in 2019 was `r arr_tripduration` seconds 
+
+The longest trip by duration on a Citi Bike in 2019 was `r longest_trip` seconds or about 38.68 Days 
+
+The shortest trip by duration on a Citi Bike in 2019 was `r shortest_trip` seconds
+
+
+#Stats, Visualizations, and Patterns 
+
+
+```{r}
+# Number of Citi Bike Stations 
+
+number_endstations <- length(levels(CitiBike2019$end.station.id)) 
+
+#Citi bike Rides in 2019 by User type 
+
+CountCustumer <- nrow(CitiBike2019[CitiBike2019$usertype == "Customer",])
+CountSubscriber <- nrow(CitiBike2019[CitiBike2019$usertype == "Subscriber",])
+TotalRides <- nrow(CitiBike2019)
+
+baseplot <- ggplot(data=CitiBike2019, aes(x= usertype))
+baseplot + geom_histogram(stat="count")
+```
+
+Number of Citi Bike End Station is `r number_endstations`
+
+Number of Citi Bike rides by users who are "Customers" is `r CountCustumer`
+Number of Citi Bike rides by users who are "Subscribers" is `r CountSubscriber`
+
+That means that 13.88% of rides are done by customers while 86.12% of rides are done by subscribers 
+
+
+```{r}
+
+
+#Average Trip Duration by User Type 
+
+avgtrip_usertype <- tapply(CitiBike2019$tripduration,CitiBike2019$usertype, mean, na.rm = T)
+
+
+barplot(sort(avgtrip_usertype, decreasing = T))
+```
+
+```{r}
+# User Type by Age Group 
+
+
+
+
+baseplot2 <- ggplot(data=CitiBike2019, aes( x= birth.year ), na.rm = T)
+baseplot2 + geom_histogram()
+```
+
+
+
+
+```{r}
+
+# Average User Age 
+
+average_userage <- mean(CitiBike2019$birth.year)
+
+# trip duration by month 
+
+baseplot3 <- ggplot(data = CitiBike2019, aes(x= starttime), na.rm = T)
+baseplot3 + geom_histogram()
+
+
+```
+
+The average year of birth of a Citi Bike user in 2019 is `r average_userage` making them about 39 years of age.
+
+### Observations 
+
+Some takeaways are that Citi Bike riders are mainly subscribers that have short trip duration compared to a small percentage of Citi Bike Users who are "Customers" who have longer trip durations on average 
+
+It can also be seen that there are more start times during the summer months which makes sense given the weather in NYC and the limitations of bicycles in snowy conditions. 
+
+Citi Bike users are on average around 39 years old and face lower numbers among younger customers. 
+
+
+
+
+
+
